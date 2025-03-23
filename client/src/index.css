@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+/* plugins */
+@plugin "daisyui";
+
+@import "./utils/colors/colors.css";
+
+.custom-container {
+	@apply max-w-[90%] mx-auto px-4 sm:px-6 lg:px-8;
+}
+.custom-container-lg {
+	@apply max-w-[80%] mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.center {
+	@apply h-screen grid place-content-center mx-auto;
+}
