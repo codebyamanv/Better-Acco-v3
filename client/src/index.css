@@ -15,3 +15,7 @@
 .center {
 	@apply h-screen grid place-content-center mx-auto;
 }
+
+.theme-button{
+	@apply bg-[#7BBCB0] rounded-3xl p-2                                                                                                                                                  
+}

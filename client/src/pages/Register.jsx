@@ -1,6 +1,7 @@
 import Input from "../utils/ui/Input";
 import Button from "../utils/ui/Button";
 
+
 export default function Register() {
 	return (
 		<form className="space-y-4">

@@ -3,9 +3,11 @@ import Home from "./pages/Home";
 import AuthHandler from "./pages/AuthHandler";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Navbar from "./componunts/Navbar";
 
 export default function App() {
-	return (
+	return (<>
+		<Navbar/>
 		<BrowserRouter>
 			<Routes>
 				<Route
@@ -32,5 +34,6 @@ export default function App() {
 				</Route>
 			</Routes>
 		</BrowserRouter>
+		</>
 	);
 }
