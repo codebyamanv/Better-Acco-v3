@@ -1,0 +1,233 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  STUDENT
+  PARTNER
+  ADMIN
+}
+
+enum RoomStatus {
+  AVAILABLE
+  SOLD_OUT
+  WAITLIST
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  ARCHIVED
+}
+
+model User {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  username     String?     @unique
+  phone        String?
+  university   String?
+  country      String?
+  city         String?
+  avatar       String?
+  role         Role        @default(STUDENT)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  properties   Property[]  @relation("PartnerProperties")
+  bookings     Booking[]
+  reviews      Review[]
+  shortlists   Shortlist[]
+}
+
+model Property {
+  id                  String       @id @default(uuid())
+  slug                String       @unique
+  title               String
+  address             String
+  city                String
+  country             String
+  postalCode          String?
+  latitude            Float?
+  longitude           Float?
+  distanceFromCenter  String?
+  rating              Float        @default(0)
+  reviewsCount        Int          @default(0)
+  ratingText          String?      @default("Good")
+  propertyType        String       @default("Student Accommodation")
+  badge               String?      // "Popular" | "New Listing" | "Discounted Price"
+  offersCount         Int          @default(0)
+  pricePerWeek        Decimal      @db.Decimal(10, 2)
+  currencySymbol      String       @default("£")
+  beds                Int          @default(1)
+  baths               Int          @default(1)
+  roomType            String       // "Ensuite" | "Studio" | "Twin-Ensuite" | "Non-Ensuite"
+  leaseType           String       // "Full Year Stay 36-44 Weeks", etc.
+  description         String       @db.Text
+  tags                String[]     @default([])
+  cancellationPolicies Json?
+  paymentPolicies     Json?
+  partnerId           String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  partner             User?        @relation("PartnerProperties", fields: [partnerId], references: [id])
+  roomTypes           RoomType[]
+  amenities           PropertyAmenity[]
+  images              PropertyImage[]
+  offers              Offer[]
+  reviews             Review[]
+  shortlists          Shortlist[]
+  leads               Lead[]
+}
+
+model RoomType {
+  id             String        @id @default(uuid())
+  propertyId     String
+  name           String        // "Bronze Studio", "Silver Studio", "Gold Studio"
+  priceRange     String?
+  availableFrom  String?
+  specs          String[]      @default([])
+  image          String?
+  createdAt      DateTime      @default(now())
+
+  property       Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  variants       RoomVariant[]
+  bookings       Booking[]
+}
+
+model RoomVariant {
+  id           String      @id @default(uuid())
+  roomTypeId   String
+  duration     String      // "51 week"
+  moveInDate   String      // "14 Sep, 2024"
+  floorNote    String?     // "Mid Floor", "High Floor", "Low Floor"
+  price        Decimal     @db.Decimal(10, 2)
+  status       RoomStatus  @default(AVAILABLE)
+
+  roomType     RoomType    @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  bookings     Booking[]
+}
+
+model Amenity {
+  id          Int               @id @default(autoincrement())
+  name        String            @unique
+  category    String            @default("general") // "bills" | "common" | "room"
+  iconKey     String?
+
+  properties  PropertyAmenity[]
+}
+
+model PropertyAmenity {
+  propertyId  String
+  amenityId   Int
+
+  property    Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amenity     Amenity           @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([propertyId, amenityId])
+}
+
+model PropertyImage {
+  id          String    @id @default(uuid())
+  propertyId  String
+  url         String
+  mediaType   String    @default("photo") // "photo" | "video" | "3d_tour"
+  sortOrder   Int       @default(0)
+
+  property    Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Offer {
+  id          Int       @id @default(autoincrement())
+  propertyId  String
+  title       String
+  code        String?
+
+  property    Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Lead {
+  id           String      @id @default(uuid())
+  name         String
+  email        String
+  countryCode  String?     @default("UK +44")
+  phone        String?
+  university   String?
+  propertyId   String?
+  sourcePage   String?     // "CountryListing" | "Partner" | "AboutUs"
+  status       LeadStatus  @default(NEW)
+  createdAt    DateTime    @default(now())
+
+  property     Property?   @relation(fields: [propertyId], references: [id])
+}
+
+model Booking {
+  id             String         @id @default(uuid())
+  userId         String
+  propertyId     String?
+  roomTypeId     String
+  roomVariantId  String?
+  duration       String
+  moveInDate     String
+  pricePerWeek   Decimal        @db.Decimal(10, 2)
+  totalAmount    Decimal        @db.Decimal(10, 2)
+  depositAmount  Decimal        @db.Decimal(10, 2)
+  status         BookingStatus  @default(PENDING)
+  createdAt      DateTime       @default(now())
+
+  user           User           @relation(fields: [userId], references: [id])
+  roomType       RoomType       @relation(fields: [roomTypeId], references: [id])
+  roomVariant    RoomVariant?   @relation(fields: [roomVariantId], references: [id])
+}
+
+model Review {
+  id          String    @id @default(uuid())
+  propertyId  String
+  userId      String
+  rating      Float
+  comment     String    @db.Text
+  createdAt   DateTime  @default(now())
+
+  property    Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model Shortlist {
+  id          String    @id @default(uuid())
+  userId      String
+  propertyId  String
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property    Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+}
+
+model BlogPost {
+  id           Int       @id @default(autoincrement())
+  slug         String    @unique
+  title        String
+  summary      String    @db.Text
+  content      String?   @db.Text
+  category     String
+  author       String
+  image        String
+  publishedAt  DateTime  @default(now())
+}

@@ -6,16 +6,30 @@
 @import "./utils/colors/colors.css";
 
 .custom-container {
-	@apply max-w-[90%] mx-auto px-4 sm:px-6 lg:px-8;
+	@apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
+
 .custom-container-lg {
-	@apply max-w-[80%] mx-auto px-4 sm:px-6 lg:px-8;
+	@apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
 .center {
-	@apply h-screen grid place-content-center mx-auto;
+	@apply min-h-screen grid place-content-center mx-auto;
 }
 
-.theme-button{
-	@apply bg-[#7BBCB0] rounded-4xl p-2                                                                                                                                                  
+.theme-button {
+	@apply bg-[#7bbcb0] hover:bg-[#68aba0] text-white font-medium rounded-full px-5 py-2.5 transition duration-200 inline-flex items-center justify-center gap-2;
+}
+
+.theme-button-outline {
+	@apply border border-[#7bbcb0] text-[#7bbcb0] hover:bg-[#7bbcb0] hover:text-white font-medium rounded-full px-5 py-2.5 transition duration-200 inline-flex items-center justify-center gap-2;
+}
+
+/* Custom scrollbar hiding utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

@@ -1,6 +1,11 @@
 @theme {
 	--color-theme: #7bbcb0;
+	--color-theme-dark: #5fa89b;
+	--color-theme-light: #eaf5f3;
 	--color-white-neutral: #d4d4d4;
 	--color-orange: #ffa902;
-	--color-white: #fafafa;
+	--color-coral: #ff6b6b;
+	--color-heading: #1e293b;
+	--color-body: #475569;
+	--color-subtle: #94a3b8;
 }
